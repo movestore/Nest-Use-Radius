@@ -1,0 +1,79 @@
+{
+  "settings": [
+	{
+      "id": "radii",
+      "name": "Radii around nest/central location",
+      "description": "Insert the required radii (in metre) for which the usage proportions shall be calculated. Values must be positive. If you want more than one radius, enter them in descending order and seperate by comma. Example: 100,200,300,500. Defaults to 500.",
+      "defaultValue": "500",
+      "type": "STRING"
+    },
+	{
+      "id": "selName",
+      "name": "Object name with nest/centre locations",
+      "description": "Provide the name of the move object containing the table of nest/center location longitudes and laditudes (e.g. 'nesting' for output of Nest Detection App).",
+      "defaultValue": null,
+      "type": "STRING"
+    },
+	{
+      "id": "trackVar",
+      "name": "Track name variable",
+      "description": "Provide the name of the variable indicating the individual tracks to calculate the distances to the next to. This must overlap with tracks IDs of the data set that shall be filtered. Defaults to 'trackId'",
+      "defaultValue": "trackId",
+      "type": "STRING"
+    }
+  ],
+  "dependencies": {
+    "R": [
+      {
+        "name": "move"
+      },
+	  {
+        "name": "foreach"
+      },
+	  {
+        "name": "geosphere"
+      },
+	  {
+        "name": "ggmap"
+      },
+	  {
+        "name": "ggplot2"
+      },
+	  {
+        "name": "sp"
+      },
+	  {
+        "name": "rgeos"
+      },
+	  {
+        "name": "fields"
+      }
+    ]
+  },
+  "createsArtifacts": true,
+  "license": {
+    "key": "MIT"
+  },
+  "language": "eng",
+  "keywords": [
+	"nest use",
+    "central location",
+	"center",
+	"radius"
+  ],
+  "people": [
+    {
+      "firstName": "Andrea",
+      "middleInitials": null,
+      "lastName": "Kölzsch",
+      "email": "akoelzsch@ab.mpg.de",
+      "roles": ["compiler","author","creator"],
+      "orcid": "0000-0003-0193-1563",
+      "affiliation": "Max-Planck-Institute of Animal Behavior",
+      "affiliationRor": "https://ror.org/026stee22"
+    }
+  ],
+  "documentation" : {
+    "url": "https://github.com/movestore/Nest-Use-Radius/blob/main/README.md"
+  }
+}
