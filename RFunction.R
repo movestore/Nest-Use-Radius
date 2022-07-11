@@ -6,6 +6,8 @@ library('ggplot2')
 library('sp')
 library('rgeos')
 library('fields')
+library('grid')
+library('gridExtra')
 
 rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL)
 {
@@ -88,36 +90,43 @@ rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL)
     
     selT.df <- as.data.frame(selT)
     
-    pdf(paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), "Tracks_withRadii_onMap.pdf"),width=12,height=8)
-    lapply(data.split, function(z){
-      
-      map <- get_map(bbox(extent(z)),source="osm",force=TRUE,zoom=10)
-      if (any(names(z)=="location.long"))
+    mymaps <- lapply(data.split,function(datai) 
+    {
+      map <- get_map(bbox(extent(datai)),source="osm",force=TRUE,zoom=10)
+      if (any(names(datai)=="location.long"))
       {
-        datai.df <- as.data.frame(moveStack(z))
+        datai.df <- as.data.frame(moveStack(datai))
       } else 
       {
-          datai.df <- data.frame(coordinates(z),as.data.frame(moveStack(z)))
+          datai.df <- data.frame(coordinates(datai),as.data.frame(moveStack(z)))
           names(datai.df)[1:2] <- c("location.long","location.lat")
       }
       
-      selTi.df <- selT.df[selT.df[,trackVar]==namesIndiv(z),]
+      selTi.df <- selT.df[selT.df[,trackVar]==namesIndiv(datai),]
       circs.i <- make_circles(selTi.df,radiuss[1])
-      for (i in seq(along=radiuss)[-1]) circs.i <- rbind(circs.i,make_circles(selTi.df,radiuss[i]))
+      for (ii in seq(along=radiuss)[-1]) circs.i <- rbind(circs.i,make_circles(selTi.df,radiuss[ii]))
       
       mymap <- ggmap(map) +
           geom_path(data=datai.df, 
                     aes(x=location.long, y=location.lat, col=trackId),show.legend=FALSE) +
+          geom_point(data=datai.df, 
+                  aes(x=location.long, y=location.lat, col=trackId),color="orange",size=1) +
           geom_point(data=selTi.df,
                      aes(x=location.long, y=location.lat),
                      size=3,color="red",alpha=0.8,shape=17) +
         geom_polygon(data = circs.i, aes(lon, lat, group = ID), color = "blue", alpha = 0) +
           theme(legend.justification = "top") +
-          labs(x="Longitude", y="Latitude") +
+          labs(x="Longitude", y="Latitude",title=namesIndiv(datai)) +
         scale_fill_manual(name="Track", values=tim.colors(length(namesIndiv(data))),aesthetics=c("colour","fill"))
         mymap
-      })
-      dev.off()
+    })
+    
+    mymaps_p  <- marrangeGrob(mymaps, nrow = 1, ncol = 1)
+    ggsave(paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Tracks_withRadii_onMap.pdf"), plot = mymaps_p, width = 21, height = 29.7, units = "cm")
+   
+    #pdf(paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), "Tracks_withRadii_onMap.pdf"),width=12,height=8)
+    #mymaps
+    #dev.off()
   }
   
   result <- data #return full data set
