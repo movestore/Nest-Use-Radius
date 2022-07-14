@@ -9,9 +9,11 @@ library('fields')
 library('grid')
 library('gridExtra')
 
-rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL)
+rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL,gap_adapt=FALSE)
 {
   Sys.setenv(tz="UTC")
+  
+  if (gap_adapt==TRUE) TL <- "timelag2" else TL <- "timelag"
   
   # create circles data frame from the centers data frame
   make_circles <- function(centers, radius, nPoints = 100){
@@ -58,8 +60,7 @@ rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL)
       nest.long <- coordinates(selT)[selT@data[,trackVar]==namesIndiv(datai),1] #nest locations are automatically the locations in the element called selVar
       nest.lat <- coordinates(selT)[selT@data[,trackVar]==namesIndiv(datai),2]
       
-      #dur <- c(timeLag(datai,units="hours"),NA)
-      dur <- datai@data$timelag # from TimeLag App
+      dur <- datai@data[,TL] # from TimeLag App
       dist.nest <- distVincentyEllipsoid(p1=c(nest.long,nest.lat),p2=coordinates(datai)) #metres
       n.loc <- prop.loc <- prop.dur <- numeric(n.rad)
       

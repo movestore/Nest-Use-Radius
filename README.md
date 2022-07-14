@@ -33,6 +33,8 @@ moveStack in Movebank format
 
 `trackVar`: Name of the track ID variable in the object containing the nest/central location coordinates. Take care that this parameter also exists in the track attributes of the input data set.
 
+`last_loctime`: Select this option if your data were collected with a regular daily gap (e.g. no locations at night). This leads the App to calculate cumulative use durations from the adapted `timelag2` that is weighting the last location before the gap with the median data resolution instead of the long gap time interval. Depending on your required data property and how the animal(s) behave during the gap (e.g. night - on nest or not?) either one or the other might be sensible. Note that (in addition to the Time Lag Between Locations App) you need to add the Adapt Time Lag for Regular Gaps App to your workflow before, if you want to use this feature.
+
 ### Null or error handling:
 **Parameter `radii`:** This parameter must contain positive values only. If multiple radii are not separated by comma, an error will occur.
 
