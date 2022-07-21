@@ -54,12 +54,18 @@ rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL,gap_adapt=FALSE)
 
     rad_table <- data.frame("track"=rep(c(ids,"mean","sd"),each=n.rad),"radius"=rep(radiuss,times=n.ids+2),"n.loc"=numeric((n.ids+2)*n.rad),"prop.locs"=numeric((n.ids+2)*n.rad),"prop.dur"=numeric((n.ids+2)*n.rad))
     
-    out <- numeric()
+    out_datai <- out_sel <- numeric()
     for (i in seq(along=data.split))
     {
       datai <- data.split[[i]]
-      nest.long <- coordinates(selT)[selT@data[,trackVar]==namesIndiv(datai),1] #nest locations are automatically the locations in the element called selVar
-      nest.lat <- coordinates(selT)[selT@data[,trackVar]==namesIndiv(datai),2]
+      seli <- which(selT@data[,trackVar]==namesIndiv(datai))
+      if (length(seli)>1) 
+        {
+        logger.info(paste("The track",namesIndiv(datai),"is related to more than one detected nesting site. Here the first nest candidate is used. Go back and adapt your nesting file (delete row of incorrect duplicate nesting sites) if this does not work for you."))
+        out_sel <- c(out_sel,seli[-1])
+        }
+      nest.long <- coordinates(selT)[selT@data[,trackVar]==namesIndiv(datai),1][1] #nest locations are automatically the locations in the element called selVar
+      nest.lat <- coordinates(selT)[selT@data[,trackVar]==namesIndiv(datai),2][1]
       
       if (length(nest.long)>0) #i.e. if there was a nest detected for this track
       {
@@ -76,7 +82,11 @@ rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL,gap_adapt=FALSE)
         }
         
         rad_table[which(rad_table$track==namesIndiv(datai)),3:5] <- data.frame(n.loc,prop.loc,prop.dur)
-      } else out <- c(out,i)
+      } else 
+      {
+        out_datai <- c(out_datai,i)
+        logger.info(paste("The track",namesIndiv(datai),"does not relate to any detected nesting attempt. It will not be analysed further, but is included in the output data."))
+      }
     }
     
     for (k in seq(along=radiuss))
@@ -93,8 +103,8 @@ rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL,gap_adapt=FALSE)
     
     write.csv(rad_table,paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), "Radius_NestUse.csv"),row.names=FALSE)
     
-    selT.df <- as.data.frame(selT)
-    if (length(out)>0) data.split.nn <- data.split[-out] #only plot tracks with detected nests
+    selT.df <- as.data.frame(selT[-out_sel])
+    if (length(out_datai)>0) data.split.nn <- data.split[-out_datai] else data.split.nn <- data.split #only plot tracks with detected nests
     
     mymaps <- lapply(data.split.nn,function(datai) 
     {
