@@ -64,11 +64,12 @@ rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL,gap_adapt=FALSE)
         logger.info(paste("The track",namesIndiv(datai),"is related to more than one detected nesting site. Here the first nest candidate is used. Go back and adapt your nesting file (delete row of incorrect duplicate nesting sites) if this does not work for you."))
         out_sel <- c(out_sel,seli[-1])
         }
-      nest.long <- coordinates(selT)[selT@data[,trackVar]==namesIndiv(datai),1][1] #nest locations are automatically the locations in the element called selVar
-      nest.lat <- coordinates(selT)[selT@data[,trackVar]==namesIndiv(datai),2][1]
       
-      if (length(nest.long)>0) #i.e. if there was a nest detected for this track
+      if (length(seli)>0) #i.e. if there was a nest detected for this track
       {
+        nest.long <- coordinates(selT)[selT@data[,trackVar]==namesIndiv(datai),1][1] #nest locations are automatically the locations in the element called selVar
+        nest.lat <- coordinates(selT)[selT@data[,trackVar]==namesIndiv(datai),2][1]
+        
         dur <- datai@data[,TL] # from TimeLag App
         dist.nest <- distVincentyEllipsoid(p1=c(nest.long,nest.lat),p2=coordinates(datai)) #metres
         n.loc <- prop.loc <- prop.dur <- numeric(n.rad)
@@ -103,12 +104,12 @@ rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL,gap_adapt=FALSE)
     
     write.csv(rad_table,paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), "Radius_NestUse.csv"),row.names=FALSE)
     
-    selT.df <- as.data.frame(selT[-out_sel])
+    if (length(out_sel)>0) selT.df <- as.data.frame(selT[-out_sel]) else selT.df <- as.data.frame(selT)
     if (length(out_datai)>0) data.split.nn <- data.split[-out_datai] else data.split.nn <- data.split #only plot tracks with detected nests
     
     mymaps <- lapply(data.split.nn,function(datai) 
     {
-      map <- get_map(bbox(extent(datai)),source="osm",force=TRUE,zoom=10)
+       map <- get_map(bbox(extent(datai)),source="osm",force=TRUE,zoom=10)
       if (any(names(datai)=="location.long"))
       {
         datai.df <- as.data.frame(moveStack(datai))
@@ -120,6 +121,7 @@ rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL,gap_adapt=FALSE)
       
       selTi.df <- selT.df[selT.df[,trackVar]==namesIndiv(datai),]
       circs.i <- make_circles(selTi.df,radiuss[1])
+      logger.info(circs.i[1,])
       for (ii in seq(along=radiuss)[-1]) circs.i <- rbind(circs.i,make_circles(selTi.df,radiuss[ii]))
       
       mymap <- ggmap(map) +
