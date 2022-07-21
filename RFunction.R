@@ -83,12 +83,12 @@ rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL,gap_adapt=FALSE)
     {
       ixk <- which(rad_table$radius==radiuss[k] & rad_table$track %in% ids)
       rad_table[which(rad_table$track=="mean" & rad_table$radius==radiuss[k]),3] <- length(rad_table$n.loc[ixk])
-      rad_table[which(rad_table$track=="mean" & rad_table$radius==radiuss[k]),4] <- mean(rad_table$prop.loc[ixk])
-      rad_table[which(rad_table$track=="mean" & rad_table$radius==radiuss[k]),5] <- mean(rad_table$prop.dur[ixk])
+      rad_table[which(rad_table$track=="mean" & rad_table$radius==radiuss[k]),4] <- mean(rad_table$prop.loc[ixk],na.rm=TRUE)
+      rad_table[which(rad_table$track=="mean" & rad_table$radius==radiuss[k]),5] <- mean(rad_table$prop.dur[ixk],na.rm=TRUE)
       
       rad_table[which(rad_table$track=="sd" & rad_table$radius==radiuss[k]),3] <- length(rad_table$n.loc[ixk])
-      rad_table[which(rad_table$track=="sd" & rad_table$radius==radiuss[k]),4] <- sd(rad_table$prop.loc[ixk])
-      rad_table[which(rad_table$track=="sd" & rad_table$radius==radiuss[k]),5] <- sd(rad_table$prop.dur[ixk])
+      rad_table[which(rad_table$track=="sd" & rad_table$radius==radiuss[k]),4] <- sd(rad_table$prop.loc[ixk],na.rm=TRUE)
+      rad_table[which(rad_table$track=="sd" & rad_table$radius==radiuss[k]),5] <- sd(rad_table$prop.dur[ixk],na.rm=TRUE)
     }
     
     write.csv(rad_table,paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), "Radius_NestUse.csv"),row.names=FALSE)
