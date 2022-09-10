@@ -51,13 +51,17 @@ rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL,gap_adapt=FALSE)
     n.rad <- length(radiuss)
     ids <- namesIndiv(data)[(which(namesIndiv(data) %in% selT@data[,trackVar]))] # names of tracks in data for which nests are available
     n.ids <- length(ids)
+    
+    data.split.sel <- data.split[which(names(data.split) %in% ids)]
+    logger.info ("The tracks",names(data.split[which((names(data.split) %in% ids)==FALSE)]),"do not relate to any detected nesting attempt. They will not be analysed further, but are included in the output data.")
 
     rad_table <- data.frame("track"=rep(c(ids,"mean","sd"),each=n.rad),"radius"=rep(radiuss,times=n.ids+2),"n.loc"=numeric((n.ids+2)*n.rad),"prop.locs"=numeric((n.ids+2)*n.rad),"prop.dur"=numeric((n.ids+2)*n.rad))
+    avg.table <- data.frame("trackId"=c(ids,"all"),"n.pts"=numeric(n.ids+1),"mean.pts.dist"=numeric(n.ids+1),"sd.pts.dist"=numeric(n.ids+1),"mean.dur.dist"=numeric(n.ids+1),"sd.dur.dist"=numeric(n.ids+1))
     
-    out_datai <- out_sel <- numeric()
-    for (i in seq(along=data.split))
+    out_sel <- dists_all <- dur_all <- numeric()
+    for (i in seq(along=data.split.sel))
     {
-      datai <- data.split[[i]]
+      datai <- data.split.sel[[i]]
       seli <- which(selT@data[,trackVar]==namesIndiv(datai))
       if (length(seli)>1) 
         {
@@ -65,30 +69,43 @@ rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL,gap_adapt=FALSE)
         out_sel <- c(out_sel,seli[-1])
         }
       
-      if (length(seli)>0) #i.e. if there was a nest detected for this track
+
+      nest.long <- coordinates(selT)[selT@data[,trackVar]==namesIndiv(datai),1][1] #nest locations are automatically the locations in the element called selVar
+      nest.lat <- coordinates(selT)[selT@data[,trackVar]==namesIndiv(datai),2][1]
+        
+      dur <- datai@data[,TL] # from TimeLag App
+      dist.nest <- distVincentyEllipsoid(p1=c(nest.long,nest.lat),p2=coordinates(datai)) #metres
+        
+      dists_all <- c(dists_all,dist.nest)
+      dur_all <- c(dur_all,dur)
+      
+      avg.table$n.pts[i] <- length(dist.nest)
+      avg.table$mean.pts.dist[i] <- mean(dist.nest,na.rm=TRUE)
+      avg.table$sd.pts.dist[i] <- sd(dist.nest,na.rm=TRUE)
+      mu_i <- sum(dist.nest*dur,na.rm=TRUE)/sum(dur,na.rm=TRUE)
+      avg.table$mean.dur.dist[i] <- mu_i
+      avg.table$sd.dur.dist[i] <- sqrt(sum((dist.nest-mu_i)*(dist.nest-mu_i)*dur,na.rm=TRUE)/sum(dur,na.rm=TRUE)) #sqrt(weighted variance)
+        
+      n.loc <- prop.loc <- prop.dur <- numeric(n.rad)
+        
+      for (j in seq(along=radiuss))
       {
-        nest.long <- coordinates(selT)[selT@data[,trackVar]==namesIndiv(datai),1][1] #nest locations are automatically the locations in the element called selVar
-        nest.lat <- coordinates(selT)[selT@data[,trackVar]==namesIndiv(datai),2][1]
-        
-        dur <- datai@data[,TL] # from TimeLag App
-        dist.nest <- distVincentyEllipsoid(p1=c(nest.long,nest.lat),p2=coordinates(datai)) #metres
-        n.loc <- prop.loc <- prop.dur <- numeric(n.rad)
-        
-        for (j in seq(along=radiuss))
-        {
-          ix <- which(dist.nest<radiuss[j])
-          n.loc[j] <- length(ix)
-          prop.loc[j] <- n.loc[j]/length(datai)
-          prop.dur[j] <- sum(dur[ix],na.rm=TRUE)/sum(dur,na.rm=TRUE)
-        }
-        
-        rad_table[which(rad_table$track==namesIndiv(datai)),3:5] <- data.frame(n.loc,prop.loc,prop.dur)
-      } else 
-      {
-        out_datai <- c(out_datai,i)
-        logger.info(paste("The track",namesIndiv(datai),"does not relate to any detected nesting attempt. It will not be analysed further, but is included in the output data."))
+        ix <- which(dist.nest<radiuss[j])
+        n.loc[j] <- length(ix)
+        prop.loc[j] <- n.loc[j]/length(datai)
+        prop.dur[j] <- sum(dur[ix],na.rm=TRUE)/sum(dur,na.rm=TRUE)
       }
+        
+      rad_table[which(rad_table$track==namesIndiv(datai)),3:5] <- data.frame(n.loc,prop.loc,prop.dur)
+
     }
+    
+    avg.table$n.pts[n.ids+1] <- length(dists_all)
+    avg.table$mean.pts.dist[n.ids+1] <- mean(dists_all,na.rm=TRUE)
+    avg.table$sd.pts.dist[n.ids+1] <- sd(dists_all,na.rm=TRUE)
+    mu_n <- sum(dists_all*dur_all,na.rm=TRUE)/sum(dur_all,na.rm=TRUE)
+    avg.table$mean.dur.dist[n.ids+1] <- mu_n
+    avg.table$sd.dur.dist[n.ids+1] <- sqrt(sum((dists_all-mu_n)*(dists_all-mu_n)*dur_all,na.rm=TRUE)/sum(dur_all,na.rm=TRUE)) #sqrt(weighted variance)
     
     for (k in seq(along=radiuss))
     {
@@ -102,10 +119,18 @@ rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL,gap_adapt=FALSE)
       rad_table[which(rad_table$track=="sd" & rad_table$radius==radiuss[k]),5] <- sd(rad_table$prop.dur[ixk],na.rm=TRUE)
     }
     
-    write.csv(rad_table,paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), "Radius_NestUse.csv"),row.names=FALSE)
+    write.csv(avg.table,paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), "Avg_NestDists.csv"),row.names=FALSE)
+    write.csv(rad_table,paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), "Radius_NestUseProps.csv"),row.names=FALSE)
     
-    if (length(out_sel)>0) selT.df <- as.data.frame(selT[-out_sel]) else selT.df <- as.data.frame(selT)
-    if (length(out_datai)>0) data.split.nn <- data.split[-out_datai] else data.split.nn <- data.split #only plot tracks with detected nests
+    if (length(out_sel)>0) #only plot tracks with first detected nest per track
+    {
+      selT.df <- as.data.frame(selT[-out_sel])
+      data.split.nn <- data.split.sel[-out_sel]
+    } else 
+    {
+        selT.df <- as.data.frame(selT)
+        data.split.nn <- data.split.sel 
+    }
     
     mymaps <- lapply(data.split.nn,function(datai) 
     {
