@@ -53,11 +53,12 @@ rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL,gap_adapt=FALSE)
     n.ids <- length(ids)
     
     data.split.sel <- data.split[which(names(data.split) %in% ids)]
-    logger.info ("The tracks",names(data.split[which((names(data.split) %in% ids)==FALSE)]),"do not relate to any detected nesting attempt. They will not be analysed further, but are included in the output data.")
+    logger.info (paste("The tracks",paste(names(data.split[which((names(data.split) %in% ids)==FALSE)]),collapse=", "),"do not relate to any detected nesting attempt. They will not be analysed further, but are included in the output data."))
 
     rad_table <- data.frame("track"=rep(c(ids,"mean","sd"),each=n.rad),"radius"=rep(radiuss,times=n.ids+2),"n.loc"=numeric((n.ids+2)*n.rad),"prop.locs"=numeric((n.ids+2)*n.rad),"prop.dur"=numeric((n.ids+2)*n.rad))
     avg.table <- data.frame("trackId"=c(ids,"all"),"n.pts"=numeric(n.ids+1),"mean.pts.dist"=numeric(n.ids+1),"sd.pts.dist"=numeric(n.ids+1),"mean.dur.dist"=numeric(n.ids+1),"sd.dur.dist"=numeric(n.ids+1))
     
+    pdf(paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), "Histograms_Dist2Nest.pdf"),width=12,height=8)
     out_sel <- dists_all <- dur_all <- numeric()
     for (i in seq(along=data.split.sel))
     {
@@ -76,6 +77,13 @@ rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL,gap_adapt=FALSE)
       dur <- datai@data[,TL] # from TimeLag App
       dist.nest <- distVincentyEllipsoid(p1=c(nest.long,nest.lat),p2=coordinates(datai)) #metres
         
+      if (any(!is.na(dist.nest)))
+      {
+        min_dist <- min(dist.nest,na.rm=TRUE)
+        max_dist <- max(dist.nest,na.rm=TRUE)
+        hist(dist.nest,xlim=c(quantile(dist.nest,probs=0.01,na.rm=TRUE),quantile(dist.nest,probs=0.99,na.rm=TRUE)),breaks=c(min_dist,0,radiuss,max_dist),main=paste("Histogramme of", namesIndiv(datai)),xlab="distance to nest",freq=FALSE,col="blue")
+      }
+      
       dists_all <- c(dists_all,dist.nest)
       dur_all <- c(dur_all,dur)
       
@@ -99,6 +107,14 @@ rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL,gap_adapt=FALSE)
       rad_table[which(rad_table$track==namesIndiv(datai)),3:5] <- data.frame(n.loc,prop.loc,prop.dur)
 
     }
+    
+    if (any(!is.na(dists_all)))
+    {
+      min_distA <- min(dists_all,na.rm=TRUE)
+      max_distA <- max(dists_all,na.rm=TRUE)
+      hist(dist.nest,xlim=c(quantile(dists_all,probs=0.01,na.rm=TRUE),quantile(dists_all,probs=0.99,na.rm=TRUE)),breaks=c(min_distA,0,radiuss,max_distA),main=paste("Histogramme of all tracks' locations"),xlab="distance to nest of respective individual",freq=FALSE,col="red")
+    }
+    dev.off()
     
     avg.table$n.pts[n.ids+1] <- length(dists_all)
     avg.table$mean.pts.dist[n.ids+1] <- mean(dists_all,na.rm=TRUE)
