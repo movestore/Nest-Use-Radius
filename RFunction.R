@@ -83,7 +83,7 @@ rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL,gap_adapt=FALSE)
         min_dist <- min(dist.nest,na.rm=TRUE)
         if (min_dist<0) min_dist <- c(min_dist,0)
         max_dist <- max(dist.nest,na.rm=TRUE)
-        hist(dist.nest,xlim=c(quantile(dist.nest,probs=0.01,na.rm=TRUE),quantile(dist.nest,probs=0.99,na.rm=TRUE)),breaks=c(min_dist,radiuss,max_dist),main=paste("Histogramme of", namesIndiv(datai)),xlab="distance to nest",freq=FALSE,col="blue")
+        hist(dist.nest,xlim=c(quantile(dist.nest,probs=0.01,na.rm=TRUE),quantile(dist.nest,probs=0.99,na.rm=TRUE)),breaks=c(min_dist,radiuss,max_dist),main=paste("Histogramme of", namesIndiv(datai)),xlab="distance to nest",freq=FALSE,col="blue",ylab="Probability density")
       }
       
       dists_all <- c(dists_all,dist.nest)
@@ -115,7 +115,7 @@ rFunction <- function(data,radii=500,selName=NULL,trackVar=NULL,gap_adapt=FALSE)
       min_distA <- min(dists_all,na.rm=TRUE)
       if(min_distA<0) min_distA <- c(min_distA,0)
       max_distA <- max(dists_all,na.rm=TRUE)
-      hist(dist.nest,xlim=c(quantile(dists_all,probs=0.01,na.rm=TRUE),quantile(dists_all,probs=0.99,na.rm=TRUE)),breaks=c(min_distA,radiuss,max_distA),main=paste("Histogramme of all tracks' locations"),xlab="distance to nest of respective individual",freq=FALSE,col="red")
+      hist(dist.nest,xlim=c(quantile(dists_all,probs=0.01,na.rm=TRUE),quantile(dists_all,probs=0.99,na.rm=TRUE)),breaks=c(min_distA,radiuss,max_distA),main=paste("Histogramme of all tracks' locations"),xlab="distance to nest of respective individual",freq=FALSE,col="red",ylab="Probability density")
     }
     dev.off()
     

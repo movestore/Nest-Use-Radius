@@ -2,7 +2,7 @@ library(jsonlite)
 source("logger.R")
 source("RFunction.R")
 
-inputFileName = "App-Output Workflow_Instance_001__Segment_Data_by_Speed__2022-07-08_09-49-28.rds" #important to set to NULL for movebank-download
+inputFileName = "App-Output Workflow_Instance_001__Cloud_Storage__2022-09-10_10-00-00.rds" #important to set to NULL for movebank-download
 outputFileName = "output.rds"
 
 args <- list()
@@ -17,7 +17,7 @@ args <- list()
 #    args[["password"]] = "any-password"
 
 # Add your arguments of your r function here
-args[["radii"]] = "100,200,300,400,500" #must be sorted in RFunction, def=500,1000
+args[["radii"]] = "100,200,300,400,500,600,700,800,900,1000" #must be sorted in RFunction, def=500,1000
 args[["selName"]] = "nesting"
 args[["trackVar"]] = "trackId" #def
 args[["gap_adapt"]] = FALSE #use timelag or timelag2
