@@ -20,13 +20,6 @@
       "description": "Provide the name of the variable indicating the individual tracks to calculate the distances to the next to. This must overlap with tracks IDs of the data set that shall be filtered. Defaults to 'trackId'",
       "defaultValue": "trackId",
       "type": "STRING"
-    },
-		{
-      "id": "gap_adapt",
-      "name": "Adapt duration stats for regular data gaps?",
-      "description": "If your data were collected with a regular daily gap (e.g. no locations at night), it might be useful to work with the adapted timelag2 that is weighting the last location before the gap with the median data resolution instead of the long gap time interval. Depending on your required data property and how the animal(s) behave during the gap (e.g. night - on nest or not?) either one or the other might be sensible. Note that (in addition to the Time Lag Between Locations App) you need to add the Adapt Time Lag for Regular Gaps App to your workflow before, if you want to use this feature.",
-      "defaultValue": false,
-      "type": "CHECKBOX"
     }
   ],
   "dependencies": {

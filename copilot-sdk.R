@@ -20,7 +20,6 @@ args <- list()
 args[["radii"]] = "100,200,300,400,500,600,700,800,900,1000" #must be sorted in RFunction, def=500,1000
 args[["selName"]] = "nesting"
 args[["trackVar"]] = "trackId" #def
-args[["gap_adapt"]] = FALSE #use timelag or timelag2
 
 #################################################################
 #################################################################
