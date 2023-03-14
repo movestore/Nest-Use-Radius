@@ -1,4 +1,4 @@
-# Nest Use by Radius
+# Radial Area Use Around Location
 MoveApps
 
 Github repository: *github.com/movestore/Nest-Use-Radius*
@@ -26,19 +26,19 @@ moveStack in Movebank format
 
 `Tracks_withRadii_onMap.pdf`: For each track an openstreet map with the track plotted together with the nest/central location and radii indicated by circles around it.
 
-### Parameters 
-`radii`: One or more radius/radii (in metre) that you want proportional use calculated for. For multiple values please separate by comma. Default 500.
+### Settings
+**Radii around nest/central location (`radii`):** One or more radius/radii (in metre) that you want proportional use calculated for. For multiple values please separate by comma. Default 500.
 
-`selVar`: Name of the object containing the nest/central location coordinates. E.g. `nesting` when using csv output from Nest Detection App.
+**Object name with nest/centre locations (`selName`):** Name of the object containing the nest/central location coordinates. E.g. `nesting` when using csv output from Nest Detection App.
 
-`trackVar`: Name of the track ID variable in the object containing the nest/central location coordinates. Take care that this parameter also exists in the track attributes of the input data set.
+**Track name variable (`trackVar`):** Name of the track ID variable in the object containing the nest/central location coordinates. Take care that this parameter also exists in the track attributes of the input data set.
 
 
 ### Null or error handling:
-**Parameter `radii`:** This parameter must contain positive values only. If multiple radii are not separated by comma, an error will occur.
+**Setting `radii`:** This parameter must contain positive values only. If multiple radii are not separated by comma, an error will occur.
 
-**Parameter `selVar`:** If there is no object with the given name the App will run into an error.
+**Setting `selName`:** If there is no object with the given name the App will run into an error.
 
-**Parameter `trackVar`:** If there is no variable with the name given here, an error will be returned.
+**Setting `trackVar`:** If there is no variable with the name given here, an error will be returned.
 
 **Data:** The full data set is returned.
